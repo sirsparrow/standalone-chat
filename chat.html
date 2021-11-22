@@ -1,0 +1,139 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="chat.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <script src="chat.js"></script>
+    <script src="tmi.min.js"></script>
+  </head>
+  <body>
+    <div id="log" class="sl__chat__layout"></div>
+
+    <!-- chat item -->
+    <script type="text/template" id="chatlist_item">
+      <div data-from="{from}" data-id="{messageId}" id="{messageId}" class="container dialog-window">
+        <img class="avatar" />
+        <span class="name" style="color: {color};">{from}</span>
+        <span class="colon"></span>
+        </span>
+        <span class="message">
+          <span class="original">{message}</span>
+          <span class="typewriter"></span>
+        </span>
+        <span class="arrow-container">
+          <span class="arrow"></span>
+        </span>
+      </div>
+    </script>
+
+    <script>
+      const template = document.getElementById("chatlist_item").innerHTML;
+
+      const client = new tmi.Client({
+        channels: ["sir__sparrow"],
+      });
+
+      client.connect();
+
+      client.on("message", (channel, tags, message, self) => {
+        console.log(tags);
+        console.log(message);
+
+        var emotes = tags["emotes"];
+
+        document.getElementById("log").insertAdjacentHTML(
+          "beforeend",
+          template
+            .replace(/{messageId}/g, tags["id"])
+            .replace(/{from}/g, tags["username"])
+            .replace(
+              /{color}/g,
+              resolveColor(channel, tags["username"], tags["color"])
+            )
+            .replace(/{message}/g, getMessageHTML(message, tags))
+        );
+      });
+
+      // taken from https://www.stefanjudis.com/blog/how-to-display-twitch-emotes-in-tmi-js-chat-messages/
+      function getMessageHTML(message, { emotes }) {
+        if (!emotes) return message;
+
+        // store all emote keywords
+        // ! you have to first scan through
+        // the message string and replace later
+        const stringReplacements = [];
+
+        // iterate of emotes to access ids and positions
+        Object.entries(emotes).forEach(([id, positions]) => {
+          // use only the first position to find out the emote key word
+          const position = positions[0];
+          const [start, end] = position.split("-");
+          const stringToReplace = message.substring(
+            parseInt(start, 10),
+            parseInt(end, 10) + 1
+          );
+
+          stringReplacements.push({
+            stringToReplace: stringToReplace,
+            replacement: `<span class="emote"><img src="https://static-cdn.jtvnw.net/emoticons/v1/${id}/3.0"></span>`,
+          });
+        });
+
+        // generate HTML and replace all emote keywords with image elements
+        const messageHTML = stringReplacements.reduce(
+          (acc, { stringToReplace, replacement }) => {
+            // obs browser doesn't seam to know about replaceAll
+            return acc.split(stringToReplace).join(replacement);
+          },
+          message
+        );
+
+        return messageHTML;
+      }
+
+      // taken from https://github.com/tmijs/tmi.js/issues/160
+      let defaultColors = [
+          "#FF0000",
+          "#0000FF",
+          "#008000",
+          "#B22222",
+          "#FF7F50",
+          "#9ACD32",
+          "#FF4500",
+          "#2E8B57",
+          "#DAA520",
+          "#D2691E",
+          "#5F9EA0",
+          "#1E90FF",
+          "#FF69B4",
+          "#8A2BE2",
+          "#00FF7F",
+        ],
+        randomColorsChosen = {};
+
+      function resolveColor(chan, name, color) {
+        if (color !== null) {
+          return color;
+        }
+        if (!(chan in randomColorsChosen)) {
+          randomColorsChosen[chan] = {};
+        }
+        if (name in randomColorsChosen[chan]) {
+          color = randomColorsChosen[chan][name];
+        } else {
+          color =
+            defaultColors[Math.floor(Math.random() * defaultColors.length)];
+          randomColorsChosen[chan][name] = color;
+        }
+        return color;
+      }
+    </script>
+  </body>
+</html>
