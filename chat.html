@@ -63,7 +63,7 @@
 
       // taken from https://www.stefanjudis.com/blog/how-to-display-twitch-emotes-in-tmi-js-chat-messages/
       function getMessageHTML(message, { emotes }) {
-        if (!emotes) return message;
+        if (!emotes) return $("<div>").text(message).html();
 
         // store all emote keywords
         // ! you have to first scan through
@@ -92,7 +92,7 @@
             // obs browser doesn't seam to know about replaceAll
             return acc.split(stringToReplace).join(replacement);
           },
-          message
+          $("<div>").text(message).html()
         );
 
         return messageHTML;
