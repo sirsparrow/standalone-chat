@@ -45,7 +45,7 @@
 
       client.connect().catch(console.error);
 
-      client.on("message", (channel, tags, message, self) => {
+      client.on("message", function onMessage(channel, tags, message, self) {
         if (!bttvEmotesFetched) {
           updateBttvEmotes(tags["room-id"]);
           bttvEmotesFetched = true;
@@ -66,15 +66,15 @@
         );
       });
 
-      const updateBttvEmotes = async (channelId) => {
+      function updateBttvEmotes(channelId) {
         fetch(`https://api.betterttv.net/3/cached/users/twitch/${channelId}`)
           .then((data) => data.json())
           .then((payload) => [
-            ...(payload?.channelEmotes || []),
-            ...(payload?.sharedEmotes || []),
+            ...((payload && payload.channelEmotes) || []),
+            ...((payload && payload.sharedEmotes) || []),
           ])
           .then((emotes) => (bttvEmotes = [...emotes]));
-      };
+      }
 
       const getMessageHtml = (message, { emotes }) => {
         let html = inlineTwitchEmotes(message, { emotes });
@@ -83,7 +83,7 @@
       };
 
       // taken from https://www.stefanjudis.com/blog/how-to-display-twitch-emotes-in-tmi-js-chat-messages/
-      const inlineTwitchEmotes = (message, { emotes }) => {
+      function inlineTwitchEmotes(message, { emotes }) {
         if (!emotes) return $("<div>").text(message).html();
 
         // store all emote keywords
@@ -117,20 +117,22 @@
         );
 
         return messageHTML;
-      };
+      }
 
-      const inlineBttvEmotes = (html) => {
+      function inlineBttvEmotes(html) {
         if (bttvEmotes.length === 0) return html;
 
         let pieces = html.split(" ");
         let translatedPieces = pieces.map((piece) => {
-          var emoteId = bttvEmotes.find((emote) => emote.code === piece)?.id;
+          var emote = bttvEmotes.find((emote) => emote.code === piece);
+          if (!emote) return piece;
+          var emoteId = emote.id;
           if (!emoteId) return piece;
           return `<span class="emote"><img src="https://cdn.betterttv.net/emote/${emoteId}/3x"></span>`;
         });
 
         return translatedPieces.join(" ");
-      };
+      }
 
       // taken from https://github.com/tmijs/tmi.js/issues/160
       let defaultColors = [
