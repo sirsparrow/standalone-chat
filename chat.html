@@ -19,14 +19,15 @@
     <!-- chat item -->
     <script type="text/template" id="chatlist_item">
       <div data-from="{from}" data-id="{messageId}" id="{messageId}" class="container dialog-window">
-        <img class="avatar" />
-        <span class="name" style="color: {color};">{from}</span>
-        <span class="colon"></span>
-        </span>
-        <span class="message">
-          <span class="original">{message}</span>
-          <span class="typewriter"></span>
-        </span>
+        <div class="wrapper">
+          <img class="avatar" />
+          <span class="name" style="color: {color};">{from}</span>
+          <span class="colon"></span>
+          <span class="message">
+            <span class="original">{message}</span>
+            <span class="typewriter"></span>
+          </span>
+        </div>
         <span class="arrow-container">
           <span class="arrow"></span>
         </span>
