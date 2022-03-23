@@ -28,17 +28,12 @@ body {
 }
 
 #log {
-  display: table;
   position: absolute;
   bottom: 0;
   left: 0;
   padding: 0 10px 10px;
   width: 100%;
   table-layout: fixed;
-}
-
-#log > div {
-  display: table-row;
 }
 
 #log > div.deleted {
@@ -56,8 +51,6 @@ body {
 
 #log .message,
 #log .meta {
-  vertical-align: top;
-  display: table-cell;
   padding-bottom: 0.1em;
 }
 
@@ -106,6 +99,11 @@ body {
 /*.container[data-from="sir__jet"] {
   filter: drop-shadow(-3px 3px 3px lightgray);
 }*/
+
+.wrapper {
+  display: inline-block;
+  flex-grow: 1;
+}
 
 .meta {
   display: flex !important;
@@ -179,4 +177,5 @@ body {
   width: 42px;
   margin: 0px 5px 0px 0px;
   border-radius: 21px;
+  margin-bottom: -13px;
 }
